@@ -31,14 +31,14 @@ def appendFromPDBRow(self,row):
 GeneData.appendFromPDBRow = appendFromPDBRow
 
 #
-from gene import GeneSets
-def loadDataFromPDBRow(self, row):
+from gene import GeneDataSets
+def appendDataFromPDBRow(self, row):
     for gene, gene_item in self.genes_by_name.iteritems():
         gene_item.appendFromPDBRow(row)
-GeneSets.loadDataFromPDBRow = loadDataFromPDBRow
+GeneDataSets.appendDataFromPDBRow = appendDataFromPDBRow
 
 def LoadGeneSetsFromPDBFile(cls, people, data_file_name):
-    gene_sets = GeneSets()
+    gene_sets = GeneDataSets()
     with open(data_file_name, 'rb') as file:
         reader = csv.reader(file, delimiter="\t", quotechar='"')
         for row in reader:
@@ -49,6 +49,6 @@ def LoadGeneSetsFromPDBFile(cls, people, data_file_name):
                     gene_sets.genes_by_name[gene] = gene_item
             else:
                 person_row_number = reader.line_num-1
-                gene_sets.loadDataFromPDBRow(row)
+                gene_sets.appendDataFromPDBRow(row)
     return gene_sets
-setattr(GeneSets, 'LoadGeneSetsFromPDBFile', classmethod(LoadGeneSetsFromPDBFile))
+setattr(GeneDataSets, 'LoadGeneSetsFromPDBFile', classmethod(LoadGeneSetsFromPDBFile))

@@ -3,7 +3,7 @@ __author__ = 'Alvaro Barbeira'
 class Person:
     """A person."""
     def __init__(self):
-        pass
+        self.id = None
 
 #
 class People:

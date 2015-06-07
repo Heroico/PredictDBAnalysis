@@ -17,8 +17,8 @@ class GFTF:
 KEY_ENSEMBLE_ID = "ensemble"
 KEY_GENE_NAME = "name"
 
-class GeneCode:
-    """genecode information"""
+class GenCode:
+    """-gencode- information. Yes, without 'e' in 'gene'"""
     def __init__(self,row):
         self.ensemble_version = row[GFTF.ENS_ID]
         self.ensemble = self.ensemble_version.split('.')[0]
@@ -26,22 +26,23 @@ class GeneCode:
         self.name = row[GFTF.GENE_NAME]
         pass
 
-class GeneCodeSet:
+class GenCodeSet:
     """Collection of gencode data sets"""
     def __init__(self):
-        self.genecodes = []
-        self.genecodes_by_ensemble_id = {}
+        self.gencodes = []
+        self.gencodes_by_ensemble_id = {}
 
-    def ReadGeneCodeInput(file_name='data/gencode.v12.V1.summary.protein'):
-        genecodes = GeneCodeSet()
+    @classmethod
+    def LoadGeneCodeInput(cls, file_name):
+        gencodes = GenCodeSet()
         with open(file_name, 'rb') as csvfile:
             reader = csv.reader(csvfile, delimiter='\t', quotechar='"')
             for row in reader:
-                genecode = GeneCode(row)
-                genecodes.genecodes.append(genecode)
+                gencode = GenCode(row)
+                gencodes.gencodes.append(gencode)
 
-                if not genecode.ensemble in genecodes.genecodes_by_ensemble_id:
-                    genecodes.genecodes_by_ensemble_id[genecode.ensemble] = genecode
+                if not gencode.ensemble in gencodes.gencodes_by_ensemble_id:
+                    gencodes.gencodes_by_ensemble_id[gencode.ensemble] = gencode
                 else:
-                    raise Exception('Duplicate ensemble id, check'+genecode.ensemble)
-        return genecodes
+                    raise Exception('Duplicate ensemble id, check'+gencode.ensemble)
+        return gencodes

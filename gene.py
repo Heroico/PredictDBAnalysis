@@ -7,7 +7,7 @@ class GeneData:
         self.name = name
         self.column = column
 #
-class GeneSets:
+class GeneDataSets:
     """Sets of -gene data-"""
     def __init__(self):
         self.genes = []
