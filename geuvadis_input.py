@@ -42,8 +42,9 @@ def loadFromGEUVADISRow(cls,row,gencode_set):
 setattr(GeneData, 'loadFromGEUVADISRow', classmethod(loadFromGEUVADISRow))
 
 from gene import GeneDataSets
-def LoadGEUVADISFile(gencodes, data_file_name):
+def LoadGEUVADISFile(gencodes, data_file_name, set_name=None):
     gene_sets = GeneDataSets()
+    gene_sets.name = set_name
     missing_gencodes =  []
     with open(data_file_name, 'rb') as file:
         reader = csv.reader(file, delimiter="\t", quotechar='"')

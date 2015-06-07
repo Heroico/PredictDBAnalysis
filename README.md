@@ -11,10 +11,17 @@ Input:
 ------
 
 - Data folder
+
 called ./data by default.
 ``` bash
-/data/dosagefiles-hapmap2   #dosage files for predixcan
-/data/pheno                 #GEUVADIS observed data
-/data/dbs                   #sqlite databases with predixcan weights
-/data/gencode
+/data/dosagefiles-hapmap2           #dosage files for predixcan
+/data/pheno                         #GEUVADIS observed data
+/data/dbs                           #sqlite databases with predixcan weights
+/data/gencode.v22.annotation.gtf    #gencode file with gene info
 ```
+
+the script
+```
+build_data.sh
+```
+will attempt to pull data from Haky Im's public repository.

@@ -28,6 +28,7 @@ class GeneDataSets:
             gene_data = self.genes_by_name[name]
         else:
             gene_data = GeneData()
+            gene_data.name = name
             self.genes.append(gene_data)
             self.genes_by_name[name] = gene_data
         return gene_data
@@ -47,6 +48,21 @@ class GeneDataSets:
             value = gene_data.data[index]
 
         return value
+
+    def dumpWithName(self,file_name):
+        with open(file_name, "w+") as file:
+            gene_names = []
+            for gene_data in self.genes:
+                gene_names.append(gene_data.name)
+            header = ",".join(gene_names)+"\n"
+            file.write(header)
+
+            for i,person in enumerate(self.people.people):
+                row = []
+                for gene_data in self.genes:
+                    row.append(gene_data.data[i])
+                line = ",".join(row)+"\n"
+                file.write(line)
 
     @classmethod
     def matchingSets(cls,set1,set2):
