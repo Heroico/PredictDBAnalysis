@@ -24,21 +24,36 @@ setattr(People,'loadPeopleFromGEUVADISHeader',classmethod(loadPeopleFromGEUVADIS
 
 #
 from gene import GeneData
-def loadFromGEUVADISRow(cls,row,gene_code_set):
-    pass
+def loadFromGEUVADISRow(cls,row,gencode_set):
+    missing = None
+    gene_data = GeneData()
+    ensemble_version = row[GFTF.TARGET_ID]
+    ensemble = ensemble_version.split(".")[0]
+    if not ensemble in gencode_set.gencodes_by_ensemble_id:
+        missing = 'Need gencode data for '+ensemble_version
+    else:
+        gencode = gencode_set.gencodes_by_ensemble_id[ensemble]
+        gene_data.name = gencode.name
+    return gene_data, missing
+
 setattr(GeneData, 'loadFromGEUVADISRow', classmethod(loadFromGEUVADISRow))
 
 from gene import GeneDataSets
 def LoadGEUVADISFile(gencodes, data_file_name):
     gene_sets = GeneDataSets()
     people = None
+    missing_gencodes =  []
     with open(data_file_name, 'rb') as file:
         reader = csv.reader(file, delimiter="\t", quotechar='"')
         for row in reader:
             if reader.line_num == 1:
                 people = People.loadPeopleFromGEUVADISHeader(row)
             else:
-                gene_data = GeneData.loadFromGEUVADISRow(row, gencodes)
-                #gene_sets.genes.append(gene_data)
-                #gene_sets.genes_by_name[gene_data.name] = gene_data
-    return gene_sets, people
+                gene_data, missing = GeneData.loadFromGEUVADISRow(row, gencodes)
+                if missing is not None:
+                    missing_gencodes.append(missing)
+                    continue
+
+                gene_sets.genes.append(gene_data)
+                gene_sets.genes_by_name[gene_data.name] = gene_data
+    return gene_sets, people, missing_gencodes

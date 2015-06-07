@@ -2,10 +2,11 @@ __author__ = 'Alvaro Barbeira'
 
 class GeneData:
     """A list of values for a Gene"""
-    def __init__(self,name,column):
+    def __init__(self,name=None,column=None):
         self.data = []
         self.name = name
         self.column = column
+
 #
 class GeneDataSets:
     """Sets of -gene data-"""
