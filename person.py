@@ -25,7 +25,7 @@ class People:
     @classmethod
     def peopleIntersection(cls,people1,people2):
         intersection = People()
-        for id1, person1 in people1.people_by_id.iteritems():
-            if id1 in people2.people_by_id:
+        for i1, person1 in enumerate(people1.people):
+            if person1.id in people2.people_by_id:
                 intersection.addPerson(person1)
         return intersection
