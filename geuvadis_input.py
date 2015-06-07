@@ -41,13 +41,13 @@ setattr(GeneData, 'loadFromGEUVADISRow', classmethod(loadFromGEUVADISRow))
 from gene import GeneDataSets
 def LoadGEUVADISFile(gencodes, data_file_name):
     gene_sets = GeneDataSets()
-    people = None
     missing_gencodes =  []
     with open(data_file_name, 'rb') as file:
         reader = csv.reader(file, delimiter="\t", quotechar='"')
         for row in reader:
             if reader.line_num == 1:
                 people = People.loadPeopleFromGEUVADISHeader(row)
+                gene_sets.people = people
             else:
                 gene_data, missing = GeneData.loadFromGEUVADISRow(row, gencodes)
                 if missing is not None:
@@ -56,4 +56,4 @@ def LoadGEUVADISFile(gencodes, data_file_name):
 
                 gene_sets.genes.append(gene_data)
                 gene_sets.genes_by_name[gene_data.name] = gene_data
-    return gene_sets, people, missing_gencodes
+    return gene_sets, missing_gencodes

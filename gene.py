@@ -13,3 +13,4 @@ class GeneDataSets:
     def __init__(self):
         self.genes = []
         self.genes_by_name = {}
+        self.people = None

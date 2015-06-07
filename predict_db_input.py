@@ -39,6 +39,7 @@ GeneDataSets.appendDataFromPDBRow = appendDataFromPDBRow
 
 def LoadGeneSetsFromPDBFile(cls, people, data_file_name):
     gene_sets = GeneDataSets()
+    gene_sets.people = people
     with open(data_file_name, 'rb') as file:
         reader = csv.reader(file, delimiter="\t", quotechar='"')
         for row in reader:
