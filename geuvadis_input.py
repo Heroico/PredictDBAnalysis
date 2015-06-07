@@ -47,7 +47,7 @@ def LoadGEUVADISFile(gencodes, data_file_name):
         for row in reader:
             if reader.line_num == 1:
                 people = People.loadPeopleFromGEUVADISHeader(row)
-                gene_sets.people = people
+                gene_sets.setUpPeople(people)
             else:
                 gene_data, missing = GeneData.loadFromGEUVADISRow(row, gencodes)
                 if missing is not None:
