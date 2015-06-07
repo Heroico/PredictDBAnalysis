@@ -20,7 +20,7 @@ def loadPeopleFromPDBSampleFile(cls,sample_file_name):
         for row in reader:
             person = Person()
             person.loadFromPDBRow(row)
-            people.addPerson(person,reader.line_num)
+            people.addPerson(person)
     return people
 setattr(People, 'loadPeopleFromPDBSampleFile', classmethod(loadPeopleFromPDBSampleFile))
 
@@ -49,7 +49,6 @@ def LoadGeneSetsFromPDBFile(cls, people, data_file_name):
                     gene_sets.genes.append(gene_item)
                     gene_sets.genes_by_name[gene] = gene_item
             else:
-                person_row_number = reader.line_num-1
                 gene_sets.appendDataFromPDBRow(row)
     return gene_sets
 setattr(GeneDataSets, 'LoadGeneSetsFromPDBFile', classmethod(LoadGeneSetsFromPDBFile))

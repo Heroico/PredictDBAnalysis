@@ -18,7 +18,7 @@ def loadPeopleFromGEUVADISHeader(cls,header):
         if i > GFTF.COORD:
             person = Person()
             person.id = text
-            people.people.append(person)
+            people.addPerson(person)
     return people
 setattr(People,'loadPeopleFromGEUVADISHeader',classmethod(loadPeopleFromGEUVADISHeader))
 
@@ -34,6 +34,9 @@ def loadFromGEUVADISRow(cls,row,gencode_set):
     else:
         gencode = gencode_set.gencodes_by_ensemble_id[ensemble]
         gene_data.name = gencode.name
+        for i,value in enumerate(row):
+            if i > GFTF.COORD:
+                gene_data.data.append(value)
     return gene_data, missing
 
 setattr(GeneData, 'loadFromGEUVADISRow', classmethod(loadFromGEUVADISRow))
