@@ -16,6 +16,12 @@ class People:
         self.people.append(person)
         self.people_by_id[person.id] = person
 
+    def dumpWithName(self,file_name):
+        with open(file_name, "w+") as file:
+            for i,person in enumerate(self.people):
+                line = person.id+","+str(i)+"\n"
+                file.write(line)
+
     @classmethod
     def peopleIntersection(cls,people1,people2):
         intersection = People()

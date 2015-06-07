@@ -25,3 +25,11 @@ the script
 build_data.sh
 ```
 will attempt to pull data from Haky Im's public repository.
+
+So far, only
+
+```
+/data/gencode.v22.annotation.gtf
+```
+
+needs to be downloaded.
