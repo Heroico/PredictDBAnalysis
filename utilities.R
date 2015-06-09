@@ -28,7 +28,7 @@ correlate_csv_files <- function(file_1, file_2) {
 		samples[index] = count
 		index = index+1
 	}
-	results <- data.frame(Columns = Columns,
+	results <- data.frame(Columns = columns,
 			Correlation = correlation, P.Value = pvalues,
 			 Samples = samples, Ymin = y_min, Ymax = y_max, Rows = nrow(data_1))
 }

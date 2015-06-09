@@ -36,8 +36,7 @@ class Process:
     def run(self):
         """High level driver"""
         self.loadObservedData()
-        if self.keep_all_dbs:
-            self.processPredicted()
+        self.processPredicted()
 
     def loadObservedData(self):
         print "Loading gencode"
@@ -48,7 +47,8 @@ class Process:
         self.observed_data,  self.missing_gencodes = geuvadis_input.LoadGEUVADISFile(self.gencodes, self.pheno_path, "observed_geuvadis_genquant")
 
     def processPredicted(self):
-        self.predictDBSIfNecessary()
+        if self.keep_all_dbs:
+            self.predictDBSIfNecessary()
         self.predict_db_people = People.loadPeopleFromPDBSampleFile(self.dosages_path+"/samples.txt")
         self.comparePredictedToObserved()
 
@@ -57,7 +57,6 @@ class Process:
         file_names = [x.split(".db")[0] for x in contents]
         for file_name in file_names:
             self.predictDBForFileIfNecessary(file_name)
-
 
     def predictDBForFileIfNecessary(self,file_name):
         output_file_name = self.buildPredictDBOutputFileName(file_name)
@@ -102,21 +101,46 @@ class Process:
     def comparePredictedToObserved(self):
         contents = self.filteredContents(self.dbs_path, self.dbs_ignore)
         file_names = [x.split(".db")[0] for x in contents]
+
+        output = []
         for file_name in file_names:
-            print "Comparing "+file_name
-            predict_db_file = self.buildPredictDBOutputFileName(file_name)
-            predict_db_data = GeneDataSets.LoadGeneSetsFromPDBFile(self.predict_db_people, predict_db_file, "predict_db_"+file_name)
-            matching_predict_db, matching_observed = GeneDataSets.matchingSets(predict_db_data, self.observed_data)
-
-            matching_predict_name = self.buildComparisonOutputfile(matching_predict_db.name)
-            matching_predict_db.dumpCSVWithName(matching_predict_name)
-
-            matching_observed_name = self.buildComparisonOutputfile(matching_observed.name)
-            matching_observed.dumpCSVWithName(matching_observed_name)
-
+            matching_predict_db_name, matching_observed_name = self.buildComparisonFiles(file_name)
+            output_file_name = self.qqR2Compare(file_name, matching_predict_db_name, matching_observed_name)
+            os.remove(matching_predict_db_name)
+            os.remove(matching_observed_name)
+            output.append(output_file_name)
             break
 
-    def buildComparisonOutputfile(self,file_name):
+        file_list_name = self.working_folder + "/" + "comparison_file_list.txt"
+        with open(file_list_name, "w+") as file:
+            for output_file_name in output:
+                line = output_file_name+"\n"
+                file.write(line)
+
+    def qqR2Compare(self,file_name, matching_predict_db_name, matching_observed_name):
+        out = self.buildComparisonOutputFileName(file_name+"_correlation")
+        command = "Rscript comparison_qqR2.R "
+        command += "--file1 " + matching_predict_db_name + " "
+        command += "--file2 " + matching_observed_name + " "
+        command += "--name "+file_name+" "
+        command += "--out "+ out
+        call([command], shell=True)
+        return out
+
+    def buildComparisonFiles(self,file_name):
+        print "Comparing "+file_name
+        predict_db_file = self.buildPredictDBOutputFileName(file_name)
+        predict_db_data = GeneDataSets.LoadGeneSetsFromPDBFile(self.predict_db_people, predict_db_file, "predict_db_"+file_name)
+        matching_predict_db, matching_observed = GeneDataSets.matchingSets(predict_db_data, self.observed_data)
+
+        matching_predict_db_name = self.buildComparisonOutputFileName(matching_predict_db.name)
+        matching_predict_db.dumpCSVWithName(matching_predict_db_name)
+
+        matching_observed_name = self.buildComparisonOutputFileName(matching_observed.name)
+        matching_observed.dumpCSVWithName(matching_observed_name)
+        return matching_predict_db_name, matching_observed_name
+
+    def buildComparisonOutputFileName(self,file_name):
         name = self.working_folder + "/" + file_name + ".csv"
         return name
 #

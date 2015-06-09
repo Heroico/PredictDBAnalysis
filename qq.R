@@ -13,12 +13,11 @@ qqR2 <- function(corvec,nn)
   mm <- length(corvec)
   nullcorvec = tanh(rnorm(mm)/sqrt(nn-3)) ## null correlation vector
   data <- data.frame(cbind(sort(corvec^2),sort(nullcorvec^2)))
-  data <- data
   colnames(data)<-c("observed","expected")
   return(data)
 }
 
-tissue_qqR2 < function(corvec, nn, tissue)
+tissue_qqR2 <- function(corvec, nn, tissue)
 {
   data <- qqR2(corvec, nn)
   data <- data %>% mutate(tissue=tissue)
@@ -26,19 +25,19 @@ tissue_qqR2 < function(corvec, nn, tissue)
   return(data)
 }
 
-merge_csv_qqR2 <- function(files)
-{
-    merged <-data.frame()
-    for (file in files) {
-        file1 = paste(file,"-predicted.csv",sep="",collapse="")
-        file2 = paste(file,"-observed.csv",sep="",collapse="")
-
-        correlation_data <- correlate_csv_files(file1, file2)
-        data <- tissue_qqR2(correlation_data$Correlation, tail(correlation_data$Rows,1),file)
-        merged <- rbind(merged,data)
-    }
-    return(merged)
-}
+#merge_csv_qqR2 <- function(files)
+#{
+#    merged <-data.frame()
+#    for (file in files) {
+#        file1 = paste(file,"-predicted.csv",sep="",collapse="")
+#        file2 = paste(file,"-observed.csv",sep="",collapse="")
+#
+#        correlation_data <- correlate_csv_files(file1, file2)
+#        data <- tissue_qqR2(correlation_data$Correlation, tail(correlation_data$Rows,1),file)
+#        merged <- rbind(merged,data)
+#    }
+#    return(merged)
+#}
 
 plot_qqR2 <-function(tissue_qqR2_data)
 {
@@ -61,5 +60,3 @@ plot_qqR2 <-function(tissue_qqR2_data)
     p3
     dev.off()
 }
-
-y ahora correr y probar
