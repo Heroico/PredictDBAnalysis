@@ -104,12 +104,8 @@ class Process:
 
         output = []
         for file_name in file_names:
-            matching_predict_db_name, matching_observed_name = self.buildComparisonFiles(file_name)
-            output_file_name = self.qqR2Compare(file_name, matching_predict_db_name, matching_observed_name)
-            os.remove(matching_predict_db_name)
-            os.remove(matching_observed_name)
+            output_file_name = self.buildQQR2Comparison(file_name)
             output.append(output_file_name)
-            break
 
         file_list_name = self.working_folder + "/" + "comparison_file_list.txt"
         with open(file_list_name, "w+") as file:
@@ -117,18 +113,30 @@ class Process:
                 line = output_file_name+"\n"
                 file.write(line)
 
+    def buildQQR2Comparison(self,file_name):
+        out = self.buildQQR2ComparisonOutputFileName(file_name)
+        print "Starting "+out
+        if os.path.isfile(out):
+            print "qqr2 already done for "+file_name
+            return out
+        matching_predict_db_name, matching_observed_name = self.buildComparisonFiles(file_name)
+        self.qqR2Compare(file_name, matching_predict_db_name, matching_observed_name)
+        return out
+
     def qqR2Compare(self,file_name, matching_predict_db_name, matching_observed_name):
-        out = self.buildComparisonOutputFileName(file_name+"_correlation")
+        print "Calculating qqR2"
+        out = self.buildQQR2ComparisonOutputFileName(file_name)
         command = "Rscript comparison_qqR2.R "
         command += "--file1 " + matching_predict_db_name + " "
         command += "--file2 " + matching_observed_name + " "
         command += "--name "+file_name+" "
         command += "--out "+ out
         call([command], shell=True)
-        return out
+        os.remove(matching_predict_db_name)
+        os.remove(matching_observed_name)
 
     def buildComparisonFiles(self,file_name):
-        print "Comparing "+file_name
+        print "Comparing files for"+file_name
         predict_db_file = self.buildPredictDBOutputFileName(file_name)
         predict_db_data = GeneDataSets.LoadGeneSetsFromPDBFile(self.predict_db_people, predict_db_file, "predict_db_"+file_name)
         matching_predict_db, matching_observed = GeneDataSets.matchingSets(predict_db_data, self.observed_data)
@@ -143,6 +151,10 @@ class Process:
     def buildComparisonOutputFileName(self,file_name):
         name = self.working_folder + "/" + file_name + ".csv"
         return name
+
+    def buildQQR2ComparisonOutputFileName(self,file_name):
+        out = self.buildComparisonOutputFileName(file_name+"_correlation")
+        return out
 #
 
 #
