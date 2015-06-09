@@ -67,7 +67,9 @@ class GeneDataSets:
     @classmethod
     def matchingSets(cls,set1,set2):
         matching1 = GeneDataSets()
+        matching1.name = "matching_"+set1.name
         matching2 = GeneDataSets()
+        matching2.name = "matching_"+set2.name
         people_intersection = People.peopleIntersection(set1.people, set2.people)
         matching1.setUpPeople(people_intersection)
         matching2.setUpPeople(people_intersection)

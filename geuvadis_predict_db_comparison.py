@@ -16,6 +16,10 @@ class Process:
             json_data = json.load(data_file)
 
             input = json_data["input"]
+
+            self.gencode_path = input["gencode"]
+            self.pheno_path = input["pheno"]
+
             data = input["data"]
 
             dbs = data["dbs"]
@@ -30,9 +34,23 @@ class Process:
 
     def run(self):
         """High level driver"""
+        self.loadObservedData()
         self.processPredicted()
 
+    def loadObservedData(self):
+        print "Loading gencode"
+        self.gencodes = gencode_input.GenCodeSet.LoadGTF(self.gencode_path)
+        print "Loading observed data"
+        self.observed_data = None
+        self.missing_gencodes = None
+        self.observed_data,  self.missing_gencodes = geuvadis_input.LoadGEUVADISFile(self.gencodes, self.pheno_path, "observed_geuvadis_genquant")
+
     def processPredicted(self):
+        self.predictDBSIfNecessary()
+        self.predict_db_people = People.loadPeopleFromPDBSampleFile(self.dosages_path+"/samples.txt")
+        self.comparePredictedToObserved()
+
+    def predictDBSIfNecessary(self):
         contents = self.filteredContents(self.dbs_path, self.dbs_ignore)
         file_names = [x.split(".db")[0] for x in contents]
         for file_name in file_names:
@@ -73,6 +91,26 @@ class Process:
         command += "--out " + self.buildPredictDBOutputFileName(file_name)
         return command
 
+    def comparePredictedToObserved(self):
+        contents = self.filteredContents(self.dbs_path, self.dbs_ignore)
+        file_names = [x.split(".db")[0] for x in contents]
+        for file_name in file_names:
+            print "Comparing "+file_name
+            predict_db_file = self.buildPredictDBOutputFileName(file_name)
+            predict_db_data = GeneDataSets.LoadGeneSetsFromPDBFile(self.predict_db_people, predict_db_file, "predict_db_"+file_name)
+            matching_predict_db, matching_observed = GeneDataSets.matchingSets(predict_db_data, self.observed_data)
+
+            matching_predict_name = self.buildComparisonOutputfile(matching_predict_db.name)
+            matching_predict_db.dumpCSVWithName(matching_predict_name)
+
+            matching_observed_name = self.buildComparisonOutputfile(matching_observed.name)
+            matching_observed.dumpCSVWithName(matching_observed_name)
+
+
+    def buildComparisonOutputfile(self,file_name):
+        name = self.working_folder + "/" + file_name + ".csv"
+        return name
+#
 
 #
 if __name__ == "__main__":
