@@ -25,6 +25,7 @@ class Process:
             dbs = data["dbs"]
             self.dbs_path = dbs["path"]
             self.dbs_ignore = dbs["ignore"]
+            self.keep_all_dbs = dbs["keep_all"]
 
             dosages = data["dosages"]
             self.dosages_path = dosages["path"]
@@ -35,7 +36,8 @@ class Process:
     def run(self):
         """High level driver"""
         self.loadObservedData()
-        self.processPredicted()
+        if self.keep_all_dbs:
+            self.processPredicted()
 
     def loadObservedData(self):
         print "Loading gencode"
@@ -54,13 +56,19 @@ class Process:
         contents = self.filteredContents(self.dbs_path, self.dbs_ignore)
         file_names = [x.split(".db")[0] for x in contents]
         for file_name in file_names:
-            output_file_name = self.buildPredictDBOutputFileName(file_name)
-            if os.path.isfile(output_file_name):
-                #print "predict db output already exists " + output_file_name
-                continue
-            command = self.buildPredictDBCommand(file_name)
-            print command
-            call([command], shell=True)
+            self.predictDBForFileIfNecessary(file_name)
+
+
+    def predictDBForFileIfNecessary(self,file_name):
+        output_file_name = self.buildPredictDBOutputFileName(file_name)
+        if os.path.isfile(output_file_name):
+            #print "predict db output already exists " + output_file_name
+            return
+        self.predictDBForFile(file_name)
+
+    def predictDBForFile(self, file_name):
+        command = self.buildPredictDBCommand(file_name)
+        call([command], shell=True)
 
     def filteredContents(self,path,patterns =[]):
         contents = os.listdir(path)
@@ -106,6 +114,7 @@ class Process:
             matching_observed_name = self.buildComparisonOutputfile(matching_observed.name)
             matching_observed.dumpCSVWithName(matching_observed_name)
 
+            break
 
     def buildComparisonOutputfile(self,file_name):
         name = self.working_folder + "/" + file_name + ".csv"

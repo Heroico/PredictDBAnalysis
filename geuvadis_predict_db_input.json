@@ -3,6 +3,7 @@
     "data" : {
       "root": "data",
       "dbs":{
+        "keep_all": false,
         "path": "data/dbs",
         "ignore": [".DS_Store", ".py"]
       },
