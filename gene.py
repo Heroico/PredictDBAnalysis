@@ -49,7 +49,7 @@ class GeneDataSets:
 
         return value
 
-    def dumpWithName(self,file_name):
+    def dumpCSVWithName(self,file_name):
         with open(file_name, "w+") as file:
             gene_names = []
             for gene_data in self.genes:
