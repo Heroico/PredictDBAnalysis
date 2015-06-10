@@ -1,0 +1,2 @@
+- finish automation of charts (integrate R plot script into python)
+- one last attempt to merge figures into a big kahoona a la supplementary figure 3

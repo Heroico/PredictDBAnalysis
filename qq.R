@@ -12,17 +12,16 @@ qqR2 <- function(corvec,nn)
 ## nullcorvec generates a random sample from correlation distributions, under the null hypothesis of 0 correlation using Fisher's approximation.
   mm <- length(corvec)
   nullcorvec = tanh(rnorm(mm)/sqrt(nn-3)) ## null correlation vector
-  data <- data.frame(cbind(sort(corvec^2),sort(nullcorvec^2)))
-  colnames(data)<-c("observed","expected")
+  data <- data.frame(observed = corvec^2, correlation = corvec)
+  data <- data[with(data, order(observed)), ]
+  data$expected <- sort(nullcorvec^2)
   return(data)
 }
 
-#EXPECTS R^2
 tissue_qqR2 <- function(corvec, nn, tissue)
 {
   data <- qqR2(corvec, nn)
-  data <- data %>% mutate(tissue=tissue)
-  colnames(data)<-c("observed","expected","tissue")
+  data$tissue <- tissue
   return(data)
 }
 
@@ -58,4 +57,43 @@ plot_qqR2 <- function(qqR2data, meanr2vec, tissue, output_file_name)
     print(p3)
     dev.off()
 }
+
+#merge_qqR2_csvs <- function(files, output_file_name)
+#{
+#    merged <- data.frame()
+#    meanr2vec <- vector()
+#    tisvec <- vector()
+#    for(file_item in files) {
+#        file_name <- as.character(file_item)
+#        qqR2Data <- read.table(file_name, sep='\t')
+#
+#        finalres<-read.table(resfile,header=T)
+#        meanr2vec <- c(meanr2vec,round(mean(qqR2data$R2,na.rm=TRUE),4))
+#
+#        tis<-as.character(qqR2data$tissue[1])
+#        tisvec<-c(tisvec,tis)
+#        p<-qqR2(sqrt(finalres[,1]),n,tis)
+#        finalp<-rbind(finalp,p)
+#    }
+#}
+#
+#plot_merged_qqR2 <- function(qqR2data, meanr2vec, tissue, output_file_name)
+#{
+#    plot<-ggplot(qqR2data,aes(x=expected,y=observed))+
+#            geom_point(pch=1,cex=1.5)
+#
+#    p2<- plot +
+#        geom_abline(intercept=0, slope=1) +
+#         xlab(expression("Expected R"^2)) +
+#         ylab(expression("Observed Predictive R"^2))+
+#          theme_bw(20)
+#
+#    ann_text <- data.frame(observed=0.8,expected=0,r2=meanr2vec,tissue=tissue)
+#    p3<-p2+
+#        geom_text(data=ann_text,aes(label=paste("mean_R^2 ==",r2,sep="")),parse=T,hjust=0,size=5)
+#
+#    png(file=output_file_name,height=320,width=480)
+#    print(p3)
+#    dev.off()
+#}
 
