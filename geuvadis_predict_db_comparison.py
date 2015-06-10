@@ -131,7 +131,10 @@ class Process:
         command += "--file2 " + matching_observed_name + " "
         command += "--name "+file_name+" "
         command += "--out "+ out
-        call([command], shell=True)
+        command = command.encode("ascii","ignore")
+        command = command.replace("\\(", "(")
+        command = command.replace("\\)", ")")
+        call(command.split(" "))
         os.remove(matching_predict_db_name)
         os.remove(matching_observed_name)
 
