@@ -1,0 +1,21 @@
+{
+  "input" : {
+    "data" : {
+      "root": "data",
+      "dbs":{
+        "keep_all": false,
+        "path": "data/dbs",
+        "ignore": [".DS_Store", ".py"]
+      },
+      "dosages": {
+        "path":"data/dosagefiles-hapmap2"
+      }
+    },
+    "pheno": "data/pheno/GD462.GeneQuantRPKM.50FN.samplename.resk10.txt",
+    "gencode": "data/gencode.v22.annotation.gtf"
+  },
+  "run" : {
+    "working_folder": "temp"
+  }
+
+}
