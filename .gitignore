@@ -3,6 +3,8 @@ dbs
 data
 temp
 intermediate
+merged.table
+test_plot.R
 DGN-WB_0.5.txt
 test.py
 kk.txt

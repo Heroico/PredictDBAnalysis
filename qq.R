@@ -17,6 +17,7 @@ qqR2 <- function(corvec,nn)
   return(data)
 }
 
+#EXPECTS R^2
 tissue_qqR2 <- function(corvec, nn, tissue)
 {
   data <- qqR2(corvec, nn)
@@ -25,25 +26,23 @@ tissue_qqR2 <- function(corvec, nn, tissue)
   return(data)
 }
 
-#merge_csv_qqR2 <- function(files)
-#{
-#    merged <-data.frame()
-#    for (file in files) {
-#        file1 = paste(file,"-predicted.csv",sep="",collapse="")
-#        file2 = paste(file,"-observed.csv",sep="",collapse="")
-#
-#        correlation_data <- correlate_csv_files(file1, file2)
-#        data <- tissue_qqR2(correlation_data$Correlation, tail(correlation_data$Rows,1),file)
-#        merged <- rbind(merged,data)
-#    }
-#    return(merged)
-#}
-
-plot_qqR2 <-function(tissue_qqR2_data)
+plot_qqR2_csvs <- function(files, output_prefix)
 {
-    plot<-ggplot(finalp,aes(x=exp,y=obs))+
-            geom_point(pch=1,cex=1.5)+
-            facet_wrap(~tissue,scales="fixed",ncol=3)
+    for (file_item in files) {
+        file_name <- as.character(file_item)
+        qqR2data <- read.table(file_name, sep='\t')
+        meanr2vec <- round(mean(qqR2data$R2,na.rm=TRUE),4)
+        tissue <- qqR2data$tissue[1]
+        output_file_name <- paste(output_prefix, "/", tissue, ".png", sep="", collapse="")
+        print(paste("plotting",output_file_name,sep=" "))
+        plot_qqR2(qqR2data, meanr2vec, tissue, output_file_name)
+    }
+}
+
+plot_qqR2 <- function(qqR2data, meanr2vec, tissue, output_file_name)
+{
+    plot<-ggplot(qqR2data,aes(x=expected,y=observed))+
+            geom_point(pch=1,cex=1.5)
 
     p2<- plot +
         geom_abline(intercept=0, slope=1) +
@@ -51,12 +50,12 @@ plot_qqR2 <-function(tissue_qqR2_data)
          ylab(expression("Observed Predictive R"^2))+
           theme_bw(20)
 
-    ann_text <- data.frame(obs=0.8,exp=0,r2=meanr2vec,tissue=factor(tisvec))
+    ann_text <- data.frame(observed=0.8,expected=0,r2=meanr2vec,tissue=tissue)
     p3<-p2+
         geom_text(data=ann_text,aes(label=paste("mean_R^2 ==",r2,sep="")),parse=T,hjust=0,size=5)
 
-
-    png(file="FigS3_DGN-EN_to_GTEx-pilot.png",height=720,width=720)
-    p3
+    png(file=output_file_name,height=320,width=480)
+    print(p3)
     dev.off()
 }
+

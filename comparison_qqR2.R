@@ -16,7 +16,9 @@ args <- parser$parse_args(commandArgs(TRUE))
 
 results <- correlate_csv_files(args$file1, args$file2)
 
-data <- tissue_qqR2(results$Correlation, tail(results$Rows,1), args$name)
+R2 <- results$Correlation^2
+data <- tissue_qqR2(R2, tail(results$Rows,1), args$name)
+data$R2 <- R2
 
 write.table(data, file = args$out, sep='\t', col.names = colnames(data))
 
