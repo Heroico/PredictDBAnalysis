@@ -33,10 +33,15 @@ class Process:
             run = json_data["run"]
             self.working_folder = run["working_folder"]
 
+            results = json_data["results"]
+            comparison = results["comparison"]
+            self.comparison_plot_path = comparison["output_path"]
+
     def run(self):
         """High level driver"""
         self.loadObservedData()
         self.processPredicted()
+        self.plotComparison()
 
     def loadObservedData(self):
         print "Loading gencode"
@@ -107,7 +112,7 @@ class Process:
             output_file_name = self.buildQQR2Comparison(file_name)
             output.append(output_file_name)
 
-        file_list_name = self.working_folder + "/" + "comparison_file_list.txt"
+        file_list_name = self.buildComparisonFileListName()
         with open(file_list_name, "w+") as file:
             for output_file_name in output:
                 line = output_file_name+"\n"
@@ -158,6 +163,17 @@ class Process:
     def buildQQR2ComparisonOutputFileName(self,file_name):
         out = self.buildComparisonOutputFileName(file_name+"_correlation")
         return out
+
+    def buildComparisonFileListName(self):
+        file_list_name = self.working_folder + "/" + "comparison_file_list.txt"
+        return file_list_name
+
+    def plotComparison(self):
+        print "Plotting"
+        command = "Rscript plot_qqR2_results.R "
+        command += "--result_list_file " + self.buildComparisonFileListName() + " "
+        command += "--output_prefix " + self.comparison_plot_path
+        call(command.split(" "))
 #
 
 #

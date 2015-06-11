@@ -16,6 +16,11 @@
   },
   "run" : {
     "working_folder": "temp"
+  },
+  "results" : {
+    "comparison": {
+      "output_path": "test_images"
+    }
   }
 
 }
