@@ -1,7 +1,7 @@
 library(argparse)
 source("qq.R")
 
-parser <- ArgumentParser(description='Process some integers')
+parser <- ArgumentParser(description='plot list of comparison files')
 parser$add_argument('--result_list_file',
                     help='file holding list of results')
 parser$add_argument('--output_prefix',

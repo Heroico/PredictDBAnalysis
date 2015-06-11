@@ -30,7 +30,7 @@ plot_qqR2_csvs <- function(files, output_prefix)
     for (file_item in files) {
         file_name <- as.character(file_item)
         qqR2data <- read.table(file_name, sep='\t')
-        meanr2vec <- round(mean(qqR2data$R2,na.rm=TRUE),4)
+        meanr2vec <- round(mean(qqR2data$observed,na.rm=TRUE),4)
         tissue <- qqR2data$tissue[1]
         output_file_name <- paste(output_prefix, "/", tissue, ".png", sep="", collapse="")
         print(paste("plotting",output_file_name,sep=" "))
@@ -58,29 +58,28 @@ plot_qqR2 <- function(qqR2data, meanr2vec, tissue, output_file_name)
     dev.off()
 }
 
-merge_qqR2_csvs <- function(files, output_file_name)
+merge_qqR2_csvs_then_plot <- function(files, output_file_name)
 {
     merged <- data.frame()
     meanr2vec <- vector()
     tisvec <- vector()
     for(file_item in files) {
         file_name <- as.character(file_item)
-        qqR2Data <- read.table(file_name, sep='\t')
+        qqR2data <- read.table(file_name, sep='\t')
 
-        finalres<-read.table(resfile,header=T)
-        meanr2vec <- c(meanr2vec,round(mean(qqR2data$R2,na.rm=TRUE),4))
+        meanr2vec <- c(meanr2vec,round(mean(qqR2data$observed,na.rm=TRUE),4))
 
         tis<-as.character(qqR2data$tissue[1])
         tisvec<-c(tisvec,tis)
-        points<-qqR2(sqrt(finalres[,1]),n,tis)
-        merged<-rbind(merged,points)
+        merged<-rbind(merged,qqR2data)
     }
-    return(merged)
+
+    plot_merged_qqR2(merged, meanr2vec, tisvec, output_file_name)
 }
 
-plot_merged_qqR2 <- function(qqR2data, meanr2vec, tissue, output_file_name)
+plot_merged_qqR2 <- function(merged_qqR2data, meanr2vec, tisvec, output_file_name)
 {
-    plot<-ggplot(finalp,
+    plot<-ggplot(merged_qqR2data,
         aes(x=expected,y=observed))+geom_point(pch=1,cex=1.5)+
         facet_wrap(~tissue,scales="fixed",ncol=3)
 
@@ -89,7 +88,7 @@ plot_merged_qqR2 <- function(qqR2data, meanr2vec, tissue, output_file_name)
         xlab(expression("Expected R"^2)) +
         ylab(expression("Observed Predictive R"^2)) + theme_bw(20)
 
-    ann_text <- data.frame(obs=0.8,exp=0,r2=meanr2vec,tissue=factor(tisvec))
+    ann_text <- data.frame(observed=0.8,expected=0,r2=meanr2vec,tissue=factor(tisvec))
     p3<-p2+
         geom_text(data=ann_text,aes(label=paste("mean_R^2 ==",r2,sep="")),parse=T,hjust=0,size=5)
 
