@@ -10,6 +10,14 @@ import predict_db_input
 import geuvadis_input
 import gencode_input
 
+#
+def split_list(alist, wanted_parts=1):
+    """Split an array into -wanted_parts- subarrays"""
+    length = len(alist)
+    return [ alist[i*length // wanted_parts: (i+1)*length // wanted_parts]
+             for i in range(wanted_parts) ]
+
+#
 class Process:
     def __init__(self, json_file):
         with open(json_file) as data_file:
@@ -40,8 +48,9 @@ class Process:
     def run(self):
         """High level driver"""
         self.loadObservedData()
-        self.processPredicted()
+        output_files = self.processPredicted()
         self.plotComparison()
+        self.plotComparisonMosaic(output_files)
 
     def loadObservedData(self):
         print "Loading gencode"
@@ -55,7 +64,8 @@ class Process:
         if self.keep_all_dbs:
             self.predictDBSIfNecessary()
         self.predict_db_people = People.loadPeopleFromPDBSampleFile(self.dosages_path+"/samples.txt")
-        self.comparePredictedToObserved()
+        file_list_name = self.comparePredictedToObserved()
+        return file_list_name
 
     def predictDBSIfNecessary(self):
         contents = self.filteredContents(self.dbs_path, self.dbs_ignore)
@@ -107,16 +117,17 @@ class Process:
         contents = self.filteredContents(self.dbs_path, self.dbs_ignore)
         file_names = [x.split(".db")[0] for x in contents]
 
-        output = []
+        output_files = []
         for file_name in file_names:
             output_file_name = self.buildQQR2Comparison(file_name)
-            output.append(output_file_name)
+            output_files.append(output_file_name)
 
         file_list_name = self.buildComparisonFileListName()
         with open(file_list_name, "w+") as file:
-            for output_file_name in output:
+            for output_file_name in output_files:
                 line = output_file_name+"\n"
                 file.write(line)
+        return output_files
 
     def buildQQR2Comparison(self,file_name):
         out = self.buildQQR2ComparisonOutputFileName(file_name)
@@ -174,6 +185,19 @@ class Process:
         command += "--result_list_file " + self.buildComparisonFileListName() + " "
         command += "--output_prefix " + self.comparison_plot_path
         call(command.split(" "))
+
+    def plotComparisonMosaic(self, output_files):
+        if len(output_files) == 0:
+            return
+        parts =round(len(output_files)/9.0)+1
+        splitted = split_list(output_files, int(parts))
+        for i,split in enumerate(splitted):
+            output = self.comparison_plot_path + "/mosaic"+str(i)+".png"
+            command = "Rscript plot_qqR2_mosaic.R --results_files "
+            command += " ".join(split) + " "
+            command += "--output "+output
+            call(command.split(" "))
+            print command
 #
 
 #
