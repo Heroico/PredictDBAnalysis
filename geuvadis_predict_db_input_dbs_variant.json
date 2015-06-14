@@ -3,7 +3,7 @@
     "data": {
       "root": "data",
       "dbs": {
-        "keep_all": true,
+        "keep_all": false,
         "path": "dbs-variant-1/dbs",
         "ignore": [
           ".DS_Store",

@@ -162,7 +162,14 @@ class Process:
     def buildComparisonFiles(self,file_name):
         print "Comparing files for"+file_name
         predict_db_file = self.buildPredictDBOutputFileName(file_name)
+
+        if not os.path.isfile(predict_db_file):
+            print "missing predict db output, calculating for "+file_name
+            self.predictDBForFile(file_name)
         predict_db_data = GeneDataSets.LoadGeneSetsFromPDBFile(self.predict_db_people, predict_db_file, "predict_db_"+file_name)
+        if not self.keep_all_dbs:
+            os.remove(predict_db_file)
+
         matching_predict_db, matching_observed = GeneDataSets.matchingSets(predict_db_data, self.observed_data)
 
         matching_predict_db_name = self.buildComparisonOutputFileName(matching_predict_db.name)
