@@ -9,7 +9,7 @@ cd data
 rm -rf pheno
 mkdir pheno
 cd pheno
-aws s3 cp s3://imlab-open/Data/1000Genomes/Transcriptome/GEUVADIS/dosagefiles-hapmap2/GD462.GeneQuantRPKM.50FN.samplename.resk10.txt.gz .
+aws s3 cp s3://imlab-open/Data/1000Genomes/Transcriptome/GEUVADIS/E-GEUV-3/GD462.GeneQuantRPKM.50FN.samplename.resk10.txt.gz .
 cd ..
 
 rm -rf dosages
