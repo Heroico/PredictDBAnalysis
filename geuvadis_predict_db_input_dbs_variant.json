@@ -1,0 +1,28 @@
+{
+  "input": {
+    "data": {
+      "root": "data",
+      "dbs": {
+        "keep_all": false,
+        "path": "dbs-variant-1/dbs",
+        "ignore": [
+          ".DS_Store",
+          ".py"
+        ]
+      },
+      "dosages": {
+        "path": "data/dosagefiles-hapmap2"
+      }
+    },
+    "pheno": "data/pheno/GD462.GeneQuantRPKM.50FN.samplename.resk10.txt",
+    "gencode": "data/gencode.v22.annotation.gtf"
+  },
+  "run": {
+    "working_folder": "dbs-variant-1/temp"
+  },
+  "results": {
+    "comparison": {
+      "output_path": "dbs-variant-1/test_images"
+    }
+  }
+}

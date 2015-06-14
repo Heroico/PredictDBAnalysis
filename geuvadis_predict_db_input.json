@@ -3,9 +3,10 @@
     "data" : {
       "root": "data",
       "dbs":{
-        "keep_all": false,
+        "keep_all": true,
         "path": "data/dbs",
-        "ignore": [".DS_Store", ".py"]
+        "ignore": [".DS_Store", ".py"],
+        "predict_db_col_rsid": "raid"
       },
       "dosages": {
         "path":"data/dosagefiles-hapmap2"

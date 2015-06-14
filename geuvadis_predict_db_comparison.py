@@ -9,6 +9,7 @@ from gene import GeneDataSets
 import predict_db_input
 import geuvadis_input
 import gencode_input
+import project_utils
 
 #
 def split_list(alist, wanted_parts=1):
@@ -34,6 +35,7 @@ class Process:
             self.dbs_path = dbs["path"]
             self.dbs_ignore = dbs["ignore"]
             self.keep_all_dbs = dbs["keep_all"]
+            self.predict_db_rsid = dbs["predict_db_col_rsid"] if "predict_db_col_rsid" in dbs else None
 
             dosages = data["dosages"]
             self.dosages_path = dosages["path"]
@@ -82,7 +84,7 @@ class Process:
 
     def predictDBForFile(self, file_name):
         command = self.buildPredictDBCommand(file_name)
-        call([command], shell=True)
+        call(command.split(" "))
 
     def filteredContents(self,path,patterns =[]):
         contents = os.listdir(path)
@@ -109,7 +111,8 @@ class Process:
         command = "python predict_gene_expression.py "
         command += "--dosages " + self.dosages_path + "/ "
         command += "--weights " + self.buildPredictDBInputFileName(file_name) + " "
-        command += "--id_col raid "
+        if self.predict_db_rsid is not None:
+            command += "--id_col "+self.predict_db_rsid + " "
         command += "--out " + self.buildPredictDBOutputFileName(file_name)
         return command
 
@@ -135,6 +138,8 @@ class Process:
         if os.path.isfile(out):
             print "qqr2 already done for "+file_name
             return out
+        else:
+            print "qqr2 needs doing for "+file_name+ " at "+out
         matching_predict_db_name, matching_observed_name = self.buildComparisonFiles(file_name)
         self.qqR2Compare(file_name, matching_predict_db_name, matching_observed_name)
         return out
@@ -157,7 +162,14 @@ class Process:
     def buildComparisonFiles(self,file_name):
         print "Comparing files for"+file_name
         predict_db_file = self.buildPredictDBOutputFileName(file_name)
+
+        if not os.path.isfile(predict_db_file):
+            print "missing predict db output, calculating for "+file_name
+            self.predictDBForFile(file_name)
         predict_db_data = GeneDataSets.LoadGeneSetsFromPDBFile(self.predict_db_people, predict_db_file, "predict_db_"+file_name)
+        if not self.keep_all_dbs:
+            os.remove(predict_db_file)
+
         matching_predict_db, matching_observed = GeneDataSets.matchingSets(predict_db_data, self.observed_data)
 
         matching_predict_db_name = self.buildComparisonOutputFileName(matching_predict_db.name)
@@ -180,7 +192,8 @@ class Process:
         return file_list_name
 
     def plotComparison(self):
-        print "Plotting"
+        print "Plotting..."
+        project_utils.ensure_folder_path(self.comparison_plot_path)
         command = "Rscript plot_qqR2_results.R "
         command += "--result_list_file " + self.buildComparisonFileListName() + " "
         command += "--output_prefix " + self.comparison_plot_path

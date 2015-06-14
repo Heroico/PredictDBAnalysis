@@ -8,6 +8,7 @@ import numpy as np
 import os
 import sqlite3
 import sys
+import project_utils
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--genelist', action="store", dest="genelist", default=None, help="Text file with chromosome, gene pairs.")
@@ -121,6 +122,7 @@ class TranscriptionMatrix:
             self.D[self.gene_index[gene],] += dosage_row * weight * multiplier # Update all cases for that gene
 
     def save(self):
+        project_utils.ensure_file_path(OUTPUT_FILE)
         with open(OUTPUT_FILE, 'w+') as outfile:
             outfile.write('\t'.join(self.gene_list) + '\n') # Nb. this lists the names of rows, not of columns
             for col in range(0, self.D.shape[1]):
