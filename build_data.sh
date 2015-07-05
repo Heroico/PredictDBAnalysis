@@ -12,10 +12,16 @@ cd pheno
 aws s3 cp s3://imlab-open/Data/1000Genomes/Transcriptome/GEUVADIS/E-GEUV-3/GD462.GeneQuantRPKM.50FN.samplename.resk10.txt.gz .
 cd ..
 
-rm -rf dosages
-mkdir dosages
-cd dosages
-aws s3 cp s3://imlab-open/Data/1000Genomes/Transcriptome/GEUVADIS/dosagefiles/ . --recursive
+#rm -rf dosagefiles
+#mkdir dosagefiles
+#cd dosagefiles
+#aws s3 cp s3://imlab-open/Data/1000Genomes/Transcriptome/GEUVADIS/dosagefiles/ . --recursive
+#cd ..
+
+rm -rf dosagefiles-hapmap2
+mkdir dosagefiles-hapmap2
+cd dosagefiles-hapmap2
+aws s3 cp s3://imlab-open/Data/1000Genomes/Transcriptome/GEUVADIS/dosagefiles-hapmap2/ . --recursive
 cd ..
 
 rm -rf dbs
