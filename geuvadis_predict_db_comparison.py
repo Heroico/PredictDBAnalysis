@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 __author__ = 'heroico'
 
 import json
@@ -193,7 +194,7 @@ class Process:
 
     def plotComparison(self):
         print "Plotting..."
-        project_utils.ensure_folder_path(self.comparison_plot_path)
+        project_utils.ensure_folder_path(self.comparison_plot_path+"/")
         command = "Rscript plot_qqR2_results.R "
         command += "--result_list_file " + self.buildComparisonFileListName() + " "
         command += "--output_prefix " + self.comparison_plot_path

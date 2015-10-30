@@ -20,7 +20,7 @@
   },
   "results" : {
     "comparison": {
-      "output_path": "test_images"
+      "output_path": "test_images_uncorrected"
     }
   }
 
