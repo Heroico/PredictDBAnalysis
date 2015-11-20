@@ -6,16 +6,17 @@ It builds several text files with correlation stats, and plots of **GEUVADIS vs 
 
 # TLDR
 
-For the dash and brazen:
+For the dash and brazen, if you have **AWS** cli tools: 
 
 Run:
 
 ```bash
 # attempt to download public data from HAky Im's S3 server
+# requires aws
 $ bash build_data.sh
 ```
 
-Download **gencode.v22.annotation.gtf** into:
+Download [gencode.v22.annotation.gtf](ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_22/gencode.v22.annotation.gtf.gz) into:
 ```
 ./data/gencode.v22.annotation.gtf
 ```
