@@ -16,8 +16,11 @@ Run:
 $ bash build_data.sh
 ```
 
-Download [gencode.v22.annotation.gtf](ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_22/gencode.v22.annotation.gtf.gz) into:
+Download **gencode.v22.annotation.gtf** into:
 ```
+# github markdown doesn't get links to ftps:
+# Download it from here ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_22/gencode.v22.annotation.gtf.gz
+# to this place:
 ./data/gencode.v22.annotation.gtf
 ```
 
