@@ -11,3 +11,5 @@ kk.txt
 dbs-variant-1/dbs
 dbs-variant-1/temp
 *.pyc
+test_*
+temp_*
