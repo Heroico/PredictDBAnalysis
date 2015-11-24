@@ -15,7 +15,8 @@
       }
     },
     "pheno": "data/pheno/GD462.GeneQuantRPKM.50FN.samplename.resk10.txt",
-    "gencode": "data/gencode.v22.annotation.gtf"
+    "gencode": "data/gencode.v22.annotation.gtf",
+    "eager_clean_up": false
   },
   "run": {
     "working_folder": "dbs-variant-1/temp"

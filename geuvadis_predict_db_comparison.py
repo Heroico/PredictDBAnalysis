@@ -3,6 +3,7 @@ __author__ = 'heroico'
 
 import json
 import os
+import shutil
 from subprocess import call
 
 from person import People
@@ -30,6 +31,13 @@ class Process(object):
         self.keep_predictions = None
         self.comparison_plot_path = None
         self.predict_db_rsid = None
+        self.eager_clean_up = None
+
+    def eagerCleanUpIfNecessary(self):
+        if self.eager_clean_up:
+            print "Eagerly cleaning up " + self.working_folder + " and " + self.comparison_plot_path
+            shutil.rmtree(self.working_folder)
+            shutil.rmtree(self.comparison_plot_path)
 
     def loadObservedData(self):
         print "Loading gencode"
@@ -145,6 +153,8 @@ class BatchProcess(Process):
 
             input = json_data["input"]
 
+            self.eager_clean_up = input["eager_clean_up"]
+
             self.gencode_path = input["gencode"]
             self.pheno_path = input["pheno"]
 
@@ -168,6 +178,7 @@ class BatchProcess(Process):
 
     def run(self):
         """High level driver"""
+        self.eagerCleanUpIfNecessary()
         self.loadObservedData()
         output_files = self.processPredicted()
         self.plotComparison()
@@ -240,8 +251,10 @@ class BasicProcess(Process):
         self.comparison_plot_path = arguments.results_folder
         self.predict_db_rsid = arguments.predict_db_rsid
         self.keep_predictions = arguments.keep_predictions
+        self.eager_clean_up = arguments.eager_clean_up
 
     def run(self):
+        self.eagerCleanUpIfNecessary()
         self.loadObservedData()
         self.predictDBForFileIfNecessary(self.db_name)
         self.comparePredictedtoObserved()
@@ -292,9 +305,13 @@ if __name__ == "__main__":
                         help="Predict db rsid column name",
                         default=None)
 
-
     parser.add_argument("--keep_predictions",
                     help="Keep derived predicted gene expression",
+                    action="store_true",
+                    default=False)
+
+    parser.add_argument("--eager_clean_up",
+                    help="Delete working and results folder before starting",
                     action="store_true",
                     default=False)
 
