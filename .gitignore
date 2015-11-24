@@ -10,6 +10,10 @@ test.py
 kk.txt
 dbs-variant-1/dbs
 dbs-variant-1/temp
+input.json
+results
+results_*
+working_*
 *.pyc
 test_*
 temp_*

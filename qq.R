@@ -6,7 +6,9 @@ source("utilities.R")
 
 qqR2 <- function(corvec,nn)
 {
-  set.seed( as.integer((as.double(Sys.time())*1000+Sys.getpid()) %% 2^31) )
+  #deprecated randomness.
+  #set.seed( as.integer((as.double(Sys.time())*1000+Sys.getpid()) %% 2^31) )
+  set.seed(100)
 ## nn is the sample size, number of individuals used to compute correlation.
 ## needs correlation vector as input.
 ## nullcorvec generates a random sample from correlation distributions, under the null hypothesis of 0 correlation using Fisher's approximation.

@@ -19,41 +19,17 @@ def split_list(alist, wanted_parts=1):
     return [ alist[i*length // wanted_parts: (i+1)*length // wanted_parts]
              for i in range(wanted_parts) ]
 
-#
-class Process:
-    def __init__(self, json_file):
-        with open(json_file) as data_file:
-            json_data = json.load(data_file)
-
-            input = json_data["input"]
-
-            self.gencode_path = input["gencode"]
-            self.pheno_path = input["pheno"]
-
-            data = input["data"]
-
-            dbs = data["dbs"]
-            self.dbs_path = dbs["path"]
-            self.dbs_ignore = dbs["ignore"]
-            self.keep_all_dbs = dbs["keep_all"]
-            self.predict_db_rsid = dbs["predict_db_col_rsid"] if "predict_db_col_rsid" in dbs else None
-
-            dosages = data["dosages"]
-            self.dosages_path = dosages["path"]
-
-            run = json_data["run"]
-            self.working_folder = run["working_folder"]
-
-            results = json_data["results"]
-            comparison = results["comparison"]
-            self.comparison_plot_path = comparison["output_path"]
-
-    def run(self):
-        """High level driver"""
-        self.loadObservedData()
-        output_files = self.processPredicted()
-        self.plotComparison()
-        self.plotComparisonMosaic(output_files)
+class Process(object):
+    def __init__(self):
+        self.gencode_path = None
+        self.pheno_path = None
+        self.working_folder = None
+        self.dbs_path = None
+        self.dosages_path = None
+        self.predict_db_rsid = None
+        self.keep_predictions = None
+        self.comparison_plot_path = None
+        self.predict_db_rsid = None
 
     def loadObservedData(self):
         print "Loading gencode"
@@ -62,43 +38,19 @@ class Process:
         self.observed_data = None
         self.missing_gencodes = None
         self.observed_data,  self.missing_gencodes = geuvadis_input.LoadGEUVADISFile(self.gencodes, self.pheno_path, "observed_geuvadis_genquant")
-
-    def processPredicted(self):
-        if self.keep_all_dbs:
-            self.predictDBSIfNecessary()
+        print "Loading people"
         self.predict_db_people = People.loadPeopleFromPDBSampleFile(self.dosages_path+"/samples.txt")
-        file_list_name = self.comparePredictedToObserved()
-        return file_list_name
-
-    def predictDBSIfNecessary(self):
-        contents = self.filteredContents(self.dbs_path, self.dbs_ignore)
-        file_names = [x.split(".db")[0] for x in contents]
-        for file_name in file_names:
-            self.predictDBForFileIfNecessary(file_name)
 
     def predictDBForFileIfNecessary(self,file_name):
         output_file_name = self.buildPredictDBOutputFileName(file_name)
         if os.path.isfile(output_file_name):
-            #print "predict db output already exists " + output_file_name
+            print "predict db output %s already exists, delete it if you want it fiugred out again " % (output_file_name, )
             return
         self.predictDBForFile(file_name)
 
     def predictDBForFile(self, file_name):
         command = self.buildPredictDBCommand(file_name)
         call(command.split(" "))
-
-    def filteredContents(self,path,patterns =[]):
-        contents = os.listdir(path)
-        filtered_contents = []
-        for file in contents:
-            is_excluded = False
-            for pattern in patterns:
-                if pattern in file:
-                    is_excluded = True
-                    break
-            if not is_excluded:
-                filtered_contents.append(file)
-        return filtered_contents
 
     def buildPredictDBOutputFileName(self,file_name):
         output_file_name = self.working_folder + "/" + file_name + ".txt"
@@ -116,22 +68,6 @@ class Process:
             command += "--id_col "+self.predict_db_rsid + " "
         command += "--out " + self.buildPredictDBOutputFileName(file_name)
         return command
-
-    def comparePredictedToObserved(self):
-        contents = self.filteredContents(self.dbs_path, self.dbs_ignore)
-        file_names = [x.split(".db")[0] for x in contents]
-
-        output_files = []
-        for file_name in file_names:
-            output_file_name = self.buildQQR2Comparison(file_name)
-            output_files.append(output_file_name)
-
-        file_list_name = self.buildComparisonFileListName()
-        with open(file_list_name, "w+") as file:
-            for output_file_name in output_files:
-                line = output_file_name+"\n"
-                file.write(line)
-        return output_files
 
     def buildQQR2Comparison(self,file_name):
         out = self.buildQQR2ComparisonOutputFileName(file_name)
@@ -168,7 +104,7 @@ class Process:
             print "missing predict db output, calculating for "+file_name
             self.predictDBForFile(file_name)
         predict_db_data = GeneDataSets.LoadGeneSetsFromPDBFile(self.predict_db_people, predict_db_file, "predict_db_"+file_name)
-        if not self.keep_all_dbs:
+        if not self.keep_predictions:
             os.remove(predict_db_file)
 
         matching_predict_db, matching_observed = GeneDataSets.matchingSets(predict_db_data, self.observed_data)
@@ -200,6 +136,84 @@ class Process:
         command += "--output_prefix " + self.comparison_plot_path
         call(command.split(" "))
 
+#
+class BatchProcess(Process):
+    def __init__(self, json_file):
+        super(BatchProcess, self).__init__()
+        with open(json_file) as data_file:
+            json_data = json.load(data_file)
+
+            input = json_data["input"]
+
+            self.gencode_path = input["gencode"]
+            self.pheno_path = input["pheno"]
+
+            data = input["data"]
+
+            dbs = data["dbs"]
+            self.dbs_path = dbs["path"]
+            self.dbs_ignore = dbs["ignore"]
+            self.keep_predictions = dbs["keep_all"]
+            self.predict_db_rsid = dbs["predict_db_col_rsid"] if "predict_db_col_rsid" in dbs else None
+
+            dosages = data["dosages"]
+            self.dosages_path = dosages["path"]
+
+            run = json_data["run"]
+            self.working_folder = run["working_folder"]
+
+            results = json_data["results"]
+            comparison = results["comparison"]
+            self.comparison_plot_path = comparison["output_path"]
+
+    def run(self):
+        """High level driver"""
+        self.loadObservedData()
+        output_files = self.processPredicted()
+        self.plotComparison()
+        self.plotComparisonMosaic(output_files)
+
+    def processPredicted(self):
+        if self.keep_predictions:
+            self.predictDBSIfNecessary()
+        file_list_name = self.comparePredictedToObserved()
+        return file_list_name
+
+    def comparePredictedToObserved(self):
+        contents = self.filteredContents(self.dbs_path, self.dbs_ignore)
+        file_names = [x.split(".db")[0] for x in contents]
+
+        output_files = []
+        for file_name in file_names:
+            output_file_name = self.buildQQR2Comparison(file_name)
+            output_files.append(output_file_name)
+
+        file_list_name = self.buildComparisonFileListName()
+        with open(file_list_name, "w+") as file:
+            for output_file_name in output_files:
+                line = output_file_name+"\n"
+                file.write(line)
+        return output_files
+
+    def predictDBSIfNecessary(self):
+        contents = self.filteredContents(self.dbs_path, self.dbs_ignore)
+        file_names = [x.split(".db")[0] for x in contents]
+        for file_name in file_names:
+            self.predictDBForFileIfNecessary(file_name)
+
+    def filteredContents(self,path,patterns =[]):
+        contents = os.listdir(path)
+        filtered_contents = []
+        for file in contents:
+            is_excluded = False
+            for pattern in patterns:
+                if pattern in file:
+                    is_excluded = True
+                    break
+            if not is_excluded:
+                filtered_contents.append(file)
+        return filtered_contents
+
     def plotComparisonMosaic(self, output_files):
         if len(output_files) == 0:
             return
@@ -212,7 +226,34 @@ class Process:
             command += "--output "+output
             call(command.split(" "))
             print command
-#
+
+class BasicProcess(Process):
+    def __init__(self, arguments):
+        super(BasicProcess, self).__init__()
+        db_folders, db_name = os.path.split(arguments.input_db)
+        self.dbs_path = db_folders
+        self.db_name = db_name.split(".db")[0] if ".db" in db_name else db_name
+        self.dosages_path = arguments.dosages_folder
+        self.pheno_path = arguments.pheno_file
+        self.gencode_path = arguments.gencode_file
+        self.working_folder = arguments.working_folder
+        self.comparison_plot_path = arguments.results_folder
+        self.predict_db_rsid = arguments.predict_db_rsid
+        self.keep_predictions = arguments.keep_predictions
+
+    def run(self):
+        self.loadObservedData()
+        self.predictDBForFileIfNecessary(self.db_name)
+        self.comparePredictedtoObserved()
+        self.plotComparison()
+
+    def comparePredictedtoObserved(self):
+        output_file_name = self.buildQQR2Comparison(self.db_name)
+
+        file_list_name = self.buildComparisonFileListName()
+        with open(file_list_name, "w+") as file:
+            line = output_file_name+"\n"
+            file.write(line)
 
 #
 if __name__ == "__main__":
@@ -220,12 +261,48 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Compare a series of predicted values against an observeded geuvadis data file.')
 
     parser.add_argument("--config_file",
-                        help="json input file name",
-                        default="geuvadis_predict_db_input.json")
+                        help="json input file name. If you provide this parameter, config parameters will be loaded from jason, and the script will run over a batch of dbs.",
+                        default=None)
 
+    parser.add_argument("--dosages_folder",
+                        help="Folder containing -dosage data- in 'PrediXcan format'",
+                        default="data/dosagefiles-hapmap2")
+
+    parser.add_argument("--input_db",
+                        help="Model DB file to analyse. Assumed to have '.db' extension.",
+                        default="data/dbs/cross-tissue_0.5.db")
+
+    parser.add_argument("--pheno_file",
+                        help="Phenotype source type",
+                        default="data/pheno/GD462.GeneQuantRPKM.50FN.samplename.resk10.txt")
+
+    parser.add_argument("--gencode_file",
+                        help="Gencode data file",
+                        default="data/gencode.v22.annotation.gtf")
+
+    parser.add_argument("--working_folder",
+                        help="Folder where temporary data will be saved to.",
+                        default="working_folder")
+
+    parser.add_argument("--results_folder",
+                        help="Folder where result statistics will be saved",
+                        default="results_folder")
+
+    parser.add_argument("--predict_db_rsid",
+                        help="Predict db rsid column name",
+                        default=None)
+
+
+    parser.add_argument("--keep_predictions",
+                    help="Keep derived predicted gene expression",
+                    action="store_true",
+                    default=False)
 
     args = parser.parse_args()
-
-    process = Process(args.config_file)
+    if args.config_file:
+        print "Starting batch process"
+        process = BatchProcess(args.config_file)
+    else:
+        process = BasicProcess(args)
 
     process.run()
