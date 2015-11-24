@@ -30,13 +30,38 @@ then run:
 $ python geuvadis_predict_db_comparison.py
 ```
 
-# Input
+# Input & Operation
 
 All Genomics data should ideally lie in subfolders within this project (see **.gitignore**).
 
+**geuvadis_predict_db_comparison.py** is the main utility in this repository. 
+It takes a set of tissue model db's as described in PrediXcan and Hae Kyung Im's publications,
+it then figures out predicted gene expression matrices for those models,
+and finally it outputs some charts and statistics.
+
+It has two ways of accepting input: via command line parameters, or a configuration file.
+If you provide a configuration file, all other options will be ignored.
+
+## Command line parameters
+
+When executing the script, you have the following argument options:
+* --config_file: If you provide this, options willbe parse from a JSON file. See below.
+* --dosages_folder: Folder with indiviudal sample dosages in "PrediXcan format". See files from **build_data.sh** For an example. 
+* --input_db: What sqlite model file to analise.
+* --pheno_file: Observed expression. Defaults to **GD462.GeneQuantRPKM.50FN.samplename.resk10.txt** from GEUVADIS.
+* --gencode_file: Gencode annotation data, defaults to **gencode.v22.annotation.gtf**
+* --working_folder: folder where intermediate stats will be dumped.
+* --results_folder: folder where result plots will be generated.
+* --predict_db_rsid: Name of column with RSID name in model database.
+* --keep_predictions: keep Gene Expression Predictions files after we are done with them. They are big-ish files.
+* --eager_clean_up: delete **working_folder** and **results_folder** before analysis.
+
+
 ## JSON config file
 
-Several parameters of the comparison process can be configured at a JSON file. Its default name is:
+Several parameters of the comparison process can be configured at a JSON file.
+If a config file is provided, the analysis will be carried in "batch mode" and process sets of dbs.
+Its default name is:
 
 ```bash
 geuvadis_predict_db_input.json
@@ -48,16 +73,53 @@ But you can write your own and use it as:
 python geuvadis_predict_db_comparison.py --config_file my_config.json
 ```
 
-Most of the settings deal with paths of folders with the data.
+Most of the settings deal with paths of folders with the data, and mirror command line parameters. 
+Hierarchy of objects and key is fixed.
 
-One exception is **"keep_all"** (let me call it *data.dbs.keep_all*).
-If set to true, will cause all the **predict db** files
-to be calculated and stored in case you want them for another calculation, since they take oh so long to finish.
-If set to false, will calculate each file on the fly and then erase it. Friendlier to the hard drive, enemier to time and energy.
+See a sample below:
 
-Another exception is "predict_db_col_rsid" (*data.dbs.predict_db_col_rsid*). Some *predict db's input sqlite files*
-may have different column names, this allows to identify the id.
-
+```bash
+{
+  "input": {
+    "data": {
+      #root data folder
+      "root": "data",
+      #db parameters
+      "dbs": {
+        #keep prediction files
+        "keep_all": false,
+        #relative path from script to dbs
+        "path": "data/dbs",
+        #files to ignore within the folder
+        "ignore": [
+          ".DS_Store",
+          ".py"
+        ]
+      },
+      #dosage files
+      "dosages": {
+        "path": "data/dosagefiles-hapmap2"
+      }
+    },
+    #phenotype file
+    "pheno": "data/pheno/GD462.GeneQuantRPKM.50FN.samplename.resk10.txt",
+    #gencode file
+    "gencode": "data/gencode.v22.annotation.gtf",
+    # delete contents from working folder and results.
+    "eager_clean_up": false
+  },
+  "run": {
+    #Folder for support stats
+    "working_folder": "temp"
+  },
+  "results": {
+    "comparison": {
+      # Where the images will be saved
+      "output_path": "test_images"
+    }
+  }
+}
+```
 
 ## Data folder example
 
