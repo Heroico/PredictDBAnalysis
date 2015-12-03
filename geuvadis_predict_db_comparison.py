@@ -69,9 +69,12 @@ class Process(object):
         return input_file_name
 
     def buildPredictDBCommand(self,file_name):
+        weight_path = self.buildPredictDBInputFileName(file_name)
+        if not os.path.exists(weight_path):
+            raise Exception("Database %s does not exist" % (weight_path, ))
         command = "python predict_gene_expression.py "
         command += "--dosages " + self.dosages_path + "/ "
-        command += "--weights " + self.buildPredictDBInputFileName(file_name) + " "
+        command += "--weights " + weight_path + " "
         if self.predict_db_rsid is not None:
             command += "--id_col "+self.predict_db_rsid + " "
         command += "--out " + self.buildPredictDBOutputFileName(file_name)
