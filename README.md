@@ -4,6 +4,19 @@ This project automates comparison of **predict db** output against **GEUVADIS** 
 
 It builds several text files with correlation stats, and plots of **GEUVADIS vs predictdb correlation**.
 
+## Context
+
+Haky Im's lab uses statistical models of the human transcriptome in several pipelines. 
+These models are stored in most cases as sqlite3 files containing weight coefficients
+describing how much a genetic marker contributes to the genetic expression of a gene.
+
+This tool automates the calculation of the **gene expression** for a set of individuals,
+according to such **transcriptome models**. The estimated **gene expression** is then compared
+to a measured transcriptome; and the correlation is then presented in a qq-plot.
+
+See the [wiki](https://github.com/Heroico/PredictDBAnalysis/wiki) for some details on what the concerned files
+look like.
+
 # TLDR
 
 For the dash and brazen, if you have **AWS** cli tools: 
@@ -45,17 +58,17 @@ If you provide a configuration file, all other options will be ignored.
 ## Command line parameters
 
 When executing the script, you have the following argument options:
-* --config_file: If you provide this, options willbe parse from a JSON file. See below.
-* --dosages_folder: Folder with indiviudal sample dosages in "PrediXcan format". See files from **build_data.sh** For an example. 
+
+* --dosages_folder: Folder with individual sample dosages in "PrediXcan format". See files from **build_data.sh** For an example. 
 * --input_db: What sqlite model file to analise.
 * --pheno_file: Observed expression. Defaults to **GD462.GeneQuantRPKM.50FN.samplename.resk10.txt** from GEUVADIS.
 * --gencode_file: Gencode annotation data, defaults to **gencode.v22.annotation.gtf**
 * --working_folder: folder where intermediate stats will be dumped.
 * --results_folder: folder where result plots will be generated.
 * --predict_db_rsid: Name of column with RSID name in model database.
-* --keep_predictions: keep Gene Expression Predictions files after we are done with them. They are big-ish files.
-* --eager_clean_up: delete **working_folder** and **results_folder** before analysis.
-
+* --keep_predictions: Optional. keep Gene Expression Predictions files after we are done with them. They are big-ish files.
+* --eager_clean_up: Optional. delete **working_folder** and **results_folder** before analysis.
+* --config_file: Optional. If you provide this, options willbe parse from a JSON file. See below.
 
 ## JSON config file
 
