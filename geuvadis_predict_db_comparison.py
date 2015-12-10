@@ -119,7 +119,6 @@ class Process(object):
             os.remove(predict_db_file)
 
         matching_predict_db, matching_observed = GeneDataSets.matchingSets(predict_db_data, self.observed_data)
-
         matching_predict_db_name = self.buildComparisonOutputFileName(matching_predict_db.name)
         matching_predict_db.dumpCSVWithName(matching_predict_db_name)
 
@@ -306,7 +305,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--predict_db_rsid",
                         help="Predict db rsid column name",
-                        default=None)
+                        default="rsid")
 
     parser.add_argument("--keep_predictions",
                     help="Keep derived predicted gene expression",

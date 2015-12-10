@@ -32,9 +32,14 @@ GeneData.appendFromPDBRow = appendFromPDBRow
 
 #
 from gene import GeneDataSets
-def appendDataFromPDBRow(self, row):
-    for gene, gene_item in self.genes_by_name.iteritems():
-        gene_item.appendFromPDBRow(row)
+def appendDataFromPDBRow(self, row, use_ens):
+    if use_ens:
+        for gene, gene_item in self.genes_by_ensemble_id_version.iteritems():
+            gene_item.appendFromPDBRow(row)
+    else:
+        for gene, gene_item in self.genes_by_name.iteritems():
+            gene_item.appendFromPDBRow(row)
+
 GeneDataSets.appendDataFromPDBRow = appendDataFromPDBRow
 
 def LoadGeneSetsFromPDBFile(cls, people, data_file_name, set_name=None):
@@ -45,11 +50,24 @@ def LoadGeneSetsFromPDBFile(cls, people, data_file_name, set_name=None):
         reader = csv.reader(file, delimiter="\t", quotechar='"')
         for row in reader:
             if reader.line_num == 1:
+                h = [g for g in row if "ENS" in g and "." in g]
+                use_ens = len(h) > 10 # dumb heuristic
+                if use_ens:
+                    print "Found genes by ensemble_id_version for "+data_file_name
+                else:
+                    print "Found genes by name for " + data_file_name
+
                 for col,gene in enumerate(row):
-                    gene_item = GeneData(gene,col)
+                    g = gene if not use_ens else None
+                    e = gene if use_ens else None
+                    gene_item = GeneData(g, e, col)
                     gene_sets.genes.append(gene_item)
-                    gene_sets.genes_by_name[gene] = gene_item
+                    if use_ens:
+                        gene_sets.genes_by_ensemble_id_version[gene] = gene_item
+                    else:
+                        gene_sets.genes_by_name[gene] = gene_item
             else:
-                gene_sets.appendDataFromPDBRow(row)
+                gene_sets.appendDataFromPDBRow(row, use_ens)
+
     return gene_sets
 setattr(GeneDataSets, 'LoadGeneSetsFromPDBFile', classmethod(LoadGeneSetsFromPDBFile))

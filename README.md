@@ -11,8 +11,9 @@ These models are stored in most cases as sqlite3 files containing weight coeffic
 describing how much a genetic marker contributes to the genetic expression of a gene.
 
 This tool automates the calculation of the **gene expression** for a set of individuals,
-according to such **transcriptome models**. The estimated **gene expression** is then compared
-to a measured transcriptome; and the correlation is then presented in a qq-plot.
+according to such **transcriptome models**. The estimated **gene expression** is then corrrelated
+to a measured **transcriptome** for each gene. 
+Finally the correlations are presented into a qq-plot, which is the output of this process.
 
 See the [wiki](https://github.com/Heroico/PredictDBAnalysis/wiki) for some details on what the concerned files
 look like.

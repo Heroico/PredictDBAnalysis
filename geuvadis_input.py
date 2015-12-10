@@ -34,6 +34,7 @@ def loadFromGEUVADISRow(cls,row,gencode_set):
     else:
         gencode = gencode_set.gencodes_by_ensemble_id[ensemble]
         gene_data.name = gencode.name
+        gene_data.ensemble_id_version = ensemble_version
         for i,value in enumerate(row):
             if i > GFTF.COORD:
                 gene_data.data.append(value)
@@ -60,4 +61,5 @@ def LoadGEUVADISFile(gencodes, data_file_name, set_name=None):
 
                 gene_sets.genes.append(gene_data)
                 gene_sets.genes_by_name[gene_data.name] = gene_data
+                gene_sets.genes_by_ensemble_id_version[gene_data.ensemble_id_version] = gene_data
     return gene_sets, missing_gencodes
